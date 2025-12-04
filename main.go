@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -18,7 +19,6 @@ type apiConfig struct {
 }
 
 func main() {
-
 	godotenv.Load(".env")
 
 	portString := os.Getenv("PORT")
@@ -36,10 +36,12 @@ func main() {
 		log.Fatal("Can not connect to database")
 	}
 
+	dbCon := database.New(conn)
 	apiCfg := apiConfig{
-		DB: database.New(conn),
+		DB: dbCon,
 	}
 
+	startScraping(dbCon, 10, time.Minute)
 	router := chi.NewRouter()
 
 	router.Use(cors.Handler(cors.Options{
